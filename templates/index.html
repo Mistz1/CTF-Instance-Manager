@@ -1,0 +1,101 @@
+{% extends "base.html" %} {% block content %}
+<div class="max-w-6xl mx-auto">
+  <div class="mb-12 border-l-4 border-emerald-500 pl-6">
+    <h1
+      class="text-5xl font-black italic tracking-tighter uppercase mb-2 accent-glow"
+    >
+      Deployment Terminal
+    </h1>
+    <p class="text-slate-400 font-mono text-sm uppercase tracking-widest">
+      Select an objective to initialize a private environment.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for challenge in challenges %}
+    <div
+      class="bg-slate-900 border border-slate-800 p-6 rounded-xl hover:border-emerald-500/50 transition-all group relative overflow-hidden"
+    >
+      <div
+        class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition"
+      >
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
+          <path
+            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+          ></path>
+        </svg>
+      </div>
+
+      <div class="mb-4">
+        <div class="flex justify-between items-start mb-2">
+          <span
+            class="text-[10px] font-mono bg-slate-800 px-2 py-1 rounded text-slate-400 uppercase"
+            >#{{ challenge.id }}</span
+          >
+          {% if challenge.challenge_name in status_map and
+          status_map[challenge.challenge_name]['status'] == 'RUNNING' %}
+          <span
+            class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20"
+            >ONLINE</span
+          >
+          {% else %}
+          <span
+            class="text-[10px] font-bold text-slate-500 bg-slate-800 px-2 py-1 rounded"
+            >OFFLINE</span
+          >
+          {% endif %}
+        </div>
+        <h3 class="text-xl font-bold tracking-tight text-white mb-1">
+          {{ challenge.display_name }}
+        </h3>
+        <p class="text-xs text-slate-500 font-mono uppercase">
+          {{ challenge.challenge_type }}
+        </p>
+      </div>
+
+      <div class="space-y-3">
+        {% if challenge.challenge_name in status_map %} {% if
+        status_map[challenge.challenge_name]['status'] == 'RUNNING' %}
+        <div class="flex space-x-2">
+          {% if status_map[challenge.challenge_name]['type'] == 'netcat' %}
+          <div
+            class="flex-grow bg-black/50 border border-slate-700 rounded p-2 text-[11px] font-mono text-emerald-400 select-all truncate"
+          >
+            {{ status_map[challenge.challenge_name]['display_text'] }}
+          </div>
+          {% else %}
+          <a
+            href="{{ status_map[challenge.challenge_name]['url'] }}"
+            target="_blank"
+            class="flex-grow bg-emerald-600 hover:bg-emerald-500 text-white text-center py-2 rounded font-bold transition text-sm"
+            >ACCESS SITE</a
+          >
+          {% endif %}
+          <a
+            href="{{ url_for('extend_challenge', challenge_name=challenge.challenge_name) }}"
+            class="w-12 flex items-center justify-center bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-xs font-bold transition"
+            >+30m</a
+          >
+        </div>
+        <p class="text-[10px] text-center font-mono text-slate-500 pt-2">
+          {{ status_map[challenge.challenge_name]['time_left'] }}
+        </p>
+        {% else %}
+        <a
+          href="{{ url_for('start', challenge_name=challenge.challenge_name) }}"
+          class="block w-full text-center bg-slate-800 hover:bg-slate-700 text-white py-3 rounded font-bold transition text-xs border border-slate-600"
+          >RE-INITIALIZE</a
+        >
+        {% endif %} {% else %}
+        <a
+          href="{{ url_for('start', challenge_name=challenge.challenge_name) }}"
+          class="block w-full text-center bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded font-bold transition text-xs shadow-lg shadow-emerald-500/20"
+          >START INSTANCE</a
+        >
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

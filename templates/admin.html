@@ -1,0 +1,149 @@
+{% extends "base.html" %} {% block content %}
+<div class="max-w-6xl mx-auto">
+  <div
+    class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-4"
+  >
+    <div>
+      <h1
+        class="text-4xl font-black italic tracking-tighter uppercase accent-glow"
+      >
+        Infrastructure Management
+      </h1>
+      <p
+        class="text-slate-400 font-mono text-xs uppercase tracking-widest mt-1"
+      >
+        Control Plane // Node Monitoring
+      </p>
+    </div>
+    <div class="bg-slate-900 border border-emerald-500/30 px-4 py-2 rounded-lg">
+      <span class="text-[10px] font-bold text-emerald-500 block"
+        >SYSTEM STATUS</span
+      >
+      <span class="text-xs font-mono text-slate-300"
+        >NODES ACTIVE: {{ WORKERS|length }}</span
+      >
+    </div>
+  </div>
+
+  <div
+    class="bg-slate-900 border border-slate-800 p-8 rounded-2xl mb-12 relative overflow-hidden"
+  >
+    <div class="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
+    <h2 class="text-lg font-bold mb-6 flex items-center">
+      <span class="w-2 h-2 bg-emerald-500 rounded-full mr-3"></span> Register
+      Challenge
+    </h2>
+    <form
+      action="/create"
+      method="POST"
+      class="grid grid-cols-1 md:grid-cols-2 gap-6"
+    >
+      <div class="col-span-2">
+        <label class="text-[10px] font-bold text-slate-500 uppercase block mb-1"
+          >Display Name</label
+        >
+        <input
+          type="text"
+          name="display_name"
+          class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-emerald-500 outline-none transition"
+        />
+      </div>
+      <div>
+        <label class="text-[10px] font-bold text-slate-500 uppercase block mb-1"
+          >Docker Image Slug</label
+        >
+        <input
+          type="text"
+          name="challenge_name"
+          class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-emerald-500 outline-none transition"
+        />
+      </div>
+      <div>
+        <label class="text-[10px] font-bold text-slate-500 uppercase block mb-1"
+          >Docker Hub User</label
+        >
+        <input
+          type="text"
+          name="author_user"
+          class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-emerald-500 outline-none transition"
+        />
+      </div>
+      <div>
+        <label class="text-[10px] font-bold text-slate-500 uppercase block mb-1"
+          >Internal Port</label
+        >
+        <input
+          type="number"
+          name="internal_port"
+          class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-emerald-500 outline-none transition"
+        />
+      </div>
+      <div>
+        <label class="text-[10px] font-bold text-slate-500 uppercase block mb-1"
+          >Interface Type</label
+        >
+        <select
+          name="challenge_type"
+          class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-emerald-500 outline-none transition cursor-pointer"
+        >
+          <option value="website">Web (HTTP Proxy)</option>
+          <option value="netcat">Netcat (Direct TCP)</option>
+        </select>
+      </div>
+      <button
+        type="submit"
+        class="col-span-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition uppercase text-sm tracking-widest mt-2"
+      >
+        Deploy Blueprint
+      </button>
+    </form>
+  </div>
+
+  <div
+    class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl"
+  >
+    <table class="w-full text-left">
+      <thead
+        class="bg-slate-800/50 text-slate-400 text-[10px] font-bold uppercase tracking-widest"
+      >
+        <tr>
+          <th class="px-6 py-4">Challenge</th>
+          <th class="px-6 py-4">Type</th>
+          <th class="px-6 py-4">Worker Node</th>
+          <th class="px-6 py-4">TTL</th>
+          <th class="px-6 py-4 text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-800 font-mono text-xs">
+        {% for instance in active_instances %}
+        <tr class="hover:bg-slate-800/30 transition">
+          <td class="px-6 py-4 font-bold text-slate-200">
+            {{ instance.challenge_name }}
+          </td>
+          <td class="px-6 py-4 uppercase text-slate-400 text-[10px]">
+            {{ instance.challenge_type }}
+          </td>
+          <td class="px-6 py-4 text-emerald-500/80">
+            {{ instance.worker_name }}
+          </td>
+          <td class="px-6 py-4">
+            {{ instance.expires_at.strftime('%H:%M:%S') }}
+          </td>
+          <td class="px-6 py-4 text-right">
+            {% if instance.container_id != "STOPPED" %}
+            <a
+              href="{{ url_for('admin_stop_instance', instance_id=instance.id) }}"
+              class="text-red-400 hover:text-red-300 font-bold underline decoration-2 underline-offset-4"
+              >HALT</a
+            >
+            {% else %}
+            <span class="text-slate-600">INACTIVE</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
